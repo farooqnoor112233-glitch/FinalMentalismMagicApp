@@ -6,7 +6,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { generateMagicList, categoryData, isLetterStraight } from '@/utils/categoryData';
 import { adManager } from '@/utils/adManager';
 
-export default function RevealScreen() {
+function RevealScreen() {
   const router = useRouter();
   const { category, selectedItem } = useLocalSearchParams();
   const [magicList, setMagicList] = useState<string[]>([]);
@@ -297,3 +297,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
+export default RevealScreen;
