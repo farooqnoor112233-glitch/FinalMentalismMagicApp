@@ -1,9 +1,15 @@
 import { Platform } from 'react-native';
 
 // Check if we're in an environment that supports native modules
-const supportsNativeModules = Platform.OS !== 'web' && 
-  // Check if we're not in Expo Go by looking for the presence of native module registry
-  typeof global.__turboModuleProxy !== 'undefined';
+// This should work for EAS development builds, production builds, and exclude only Expo Go and web
+const supportsNativeModules = Platform.OS !== 'web' && (
+  // Check for EAS development build or production build
+  typeof global.__turboModuleProxy !== 'undefined' ||
+  // Alternative check for older React Native versions or different build configurations
+  typeof global.__fbBatchedBridge !== 'undefined' ||
+  // Check if we're in a standalone app (not Expo Go)
+  !global.expo?.modules?.ExpoGo
+);
 
 let RewardedAd: any = null;
 let RewardedAdEventType: any = null;
@@ -18,12 +24,13 @@ if (supportsNativeModules) {
     RewardedAdEventType = adMobModule.RewardedAdEventType;
     TestIds = adMobModule.TestIds;
     MobileAds = adMobModule.MobileAds;
-    console.log('AdMob modules loaded successfully');
+    console.log('AdMob modules loaded successfully for native build');
   } catch (error) {
-    console.log('AdMob module not available, running in mock mode:', error.message);
+    console.log('AdMob module failed to load:', error.message);
+    console.log('This might be normal in Expo Go, but should work in EAS builds');
   }
 } else {
-  console.log('Native modules not supported in this environment, running in mock mode');
+  console.log('Environment detected as not supporting native modules (likely Expo Go or web)');
 }
 
 // Placeholder Ad Unit IDs - replace with actual client IDs
@@ -47,15 +54,15 @@ class AdManager {
 
   private async initializeAds() {
     if (!MobileAds) {
-      console.log('AdMob not available, running in mock mode');
+      console.log('MobileAds not available - this should only happen in Expo Go or web');
       return;
     }
     
     try {
       await MobileAds().initialize();
-      console.log('AdMob initialized successfully');
+      console.log('AdMob initialized successfully in native build');
     } catch (error) {
-      console.log('AdMob initialization failed: ', error);
+      console.log('AdMob initialization failed:', error);
     }
   }
 
@@ -65,7 +72,7 @@ class AdManager {
     }
 
     if (!RewardedAd || !RewardedAdEventType) {
-      console.log('RewardedAd not available, skipping ad creation');
+      console.log('RewardedAd classes not available - check if AdMob is properly configured');
       return;
     }
 
@@ -119,7 +126,7 @@ class AdManager {
 
   public async showRewardedAd(): Promise<boolean> {
     if (!RewardedAd || !this.rewardedAd) {
-      console.log('AdMob not available, simulating ad completion');
+      console.log('AdMob not available in this environment, simulating ad completion');
       this.resetCounter();
       return true;
     }
