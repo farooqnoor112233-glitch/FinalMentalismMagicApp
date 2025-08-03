@@ -90,7 +90,7 @@ class AdManager {
       console.log('User earned reward:', reward);
     });
 
-    this.rewardedAd.addAdEventListener(RewardedAdEventType.CLOSED, () => {
+    this.rewardedAd.addAdEventListener(RewardedAdEventType.DISMISSED, () => {
       console.log('Rewarded ad closed');
       this.isAdLoaded = false;
       // Preload next ad
